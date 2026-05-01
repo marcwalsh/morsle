@@ -9,7 +9,7 @@ const MAX_GUESSES = 6;
 const KB_ROWS = [
   ['Q','W','E','R','T','Y','U','I','O','P'],
   ['A','S','D','F','G','H','J','K','L'],
-  ['ENTER','Z','X','C','V','B','N','M','BACK']
+  ['BACK','Z','X','C','V','B','N','M','ENTER']
 ];
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -118,7 +118,9 @@ export function handleKey(key) {
   if (key === 'ENTER') return submitGuess();
   if (key === 'BACK') {
     state.current = state.current.slice(0, -1);
-    return renderActiveRow();
+    renderActiveRow();
+    document.dispatchEvent(new CustomEvent('morsel:state'));
+    return;
   }
   if (state.current.length >= 5) return;
   if (!/^[A-Z]$/.test(key)) return;
@@ -129,6 +131,7 @@ export function handleKey(key) {
     tile.classList.add('pop');
     setTimeout(() => tile.classList.remove('pop'), 140);
   }
+  document.dispatchEvent(new CustomEvent('morsel:state'));
 }
 
 async function submitGuess() {
@@ -219,6 +222,12 @@ function showPostGame({ autoPlay = false } = {}) {
 export function render() {
   renderBoard();
   renderKeyboard();
+  document.dispatchEvent(new CustomEvent('morsel:state'));
+}
+
+export function canPlayLastGuess() {
+  if (!state) return false;
+  return state.guesses.length > 0 || state.current.length > 0;
 }
 
 function renderBoard() {
@@ -283,17 +292,11 @@ function renderKeyboard() {
         btn.textContent = key === 'ENTER' ? 'ENTER' : '⌫';
         btn.setAttribute('aria-label', key === 'ENTER' ? 'Submit guess' : 'Delete letter');
       } else {
-        btn.innerHTML = `<span class="k-letter">${key}</span><span class="k-morse">${MORSE[key]}</span>`;
-        btn.setAttribute('aria-label', `${key} (Morse ${MORSE[key]})`);
+        btn.textContent = key;
+        btn.setAttribute('aria-label', key);
         if (state.keyStates[key]) btn.classList.add(state.keyStates[key]);
       }
-      btn.addEventListener('click', () => {
-        if (key !== 'ENTER' && key !== 'BACK') {
-          ensureAudio();
-          playMorse(MORSE[key]);
-        }
-        handleKey(key);
-      });
+      btn.addEventListener('click', () => handleKey(key));
       rowEl.appendChild(btn);
     });
     kb.appendChild(rowEl);

@@ -1,7 +1,7 @@
 // Boot and event wiring.
 
 import { MORSE, ensureAudio, playMorse } from './morse.js';
-import { initGame, handleKey, playLastSubmittedGuess, playAnswer, isInModalContext } from './game.js';
+import { initGame, handleKey, playLastSubmittedGuess, playAnswer, isInModalContext, canPlayLastGuess } from './game.js';
 import { msUntilMidnightET } from './words.js';
 import { getStats } from './streak.js';
 
@@ -82,8 +82,6 @@ function bindEvents() {
     if (k === 'ENTER') { e.preventDefault(); handleKey('ENTER'); }
     else if (e.key === 'Backspace') { e.preventDefault(); handleKey('BACK'); }
     else if (/^[A-Z]$/.test(k) && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      ensureAudio();
-      playMorse(MORSE[k]);
       handleKey(k);
     }
   });
@@ -106,17 +104,20 @@ function bindEvents() {
   document.querySelectorAll('.modal').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.hidden = true; });
   });
+}
 
-  document.getElementById('hardmode-toggle').addEventListener('change', e => {
-    document.body.classList.toggle('hardmode', e.target.checked);
-  });
+function refreshPlayButton() {
+  const btn = document.getElementById('btn-play');
+  btn.disabled = !canPlayLastGuess();
 }
 
 async function boot() {
   bindEvents();
   renderChart();
+  document.addEventListener('morsel:state', refreshPlayButton);
   await initGame({ onChange: renderStats });
   renderStats();
+  refreshPlayButton();
   startCountdown();
 }
 

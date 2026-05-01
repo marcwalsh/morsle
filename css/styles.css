@@ -90,42 +90,56 @@ header {
   color: var(--paper);
   outline: none;
 }
-.icon-btn.play {
-  background: var(--ink);
-  color: var(--paper);
-}
-.icon-btn.play:hover { opacity: 0.85; }
-
-/* --- Mode bar --- */
-.mode-bar {
+/* --- Top bar (play button + streak) --- */
+.top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.65rem;
-  margin-bottom: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
   gap: 12px;
+  margin-bottom: 14px;
 }
-.mode-bar label {
-  cursor: pointer;
+.play-button {
+  flex: 1;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  user-select: none;
+  justify-content: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 12px 16px;
+  font-family: 'Special Elite', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+  box-shadow: 3px 3px 0 var(--ink);
 }
-.mode-bar input { accent-color: var(--ink); cursor: pointer; }
-.mode-bar .streak-pill {
+.play-button:hover { opacity: 0.92; }
+.play-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.play-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.play-button .play-icon { font-size: 1rem; }
+.play-button .play-label {
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+.streak-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid var(--ink);
-  padding: 3px 8px;
+  border: 1.5px solid var(--ink);
+  padding: 6px 10px;
   border-radius: 999px;
   font-weight: 700;
+  font-size: 0.8rem;
+  font-family: 'Special Elite', monospace;
 }
-.mode-bar .streak-pill::before { content: "·–·"; letter-spacing: 0.18em; opacity: 0.7; }
+.streak-pill::before { content: "·–·"; letter-spacing: 0.18em; opacity: 0.7; font-size: 0.7rem; }
 
 /* --- Board --- */
 #board {
@@ -212,33 +226,28 @@ header {
   flex: 1;
   min-width: 0;
   max-width: 42px;
-  height: 50px;
+  height: 52px;
   border: 1.5px solid var(--ink);
   background: rgba(255,255,255,0.25);
   color: var(--ink);
   font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 3px;
-  padding: 4px 2px;
+  padding: 0;
   transition: background 0.15s ease, transform 0.05s ease;
 }
 .key:active { transform: translateY(1px); }
-.key.wide { flex: 1.6; max-width: 64px; font-size: 0.6rem; letter-spacing: 0.08em; font-weight: 700; }
+.key.wide { flex: 1.6; max-width: 64px; font-size: 0.7rem; letter-spacing: 0.08em; }
 .key.enter { background: var(--ink); color: var(--paper); }
 .key.enter:hover { opacity: 0.9; }
-.key .k-letter { font-size: 0.92rem; font-weight: 700; line-height: 1; }
-.key .k-morse { font-size: 0.55rem; letter-spacing: 0.16em; opacity: 0.65; margin-top: 3px; line-height: 1; }
 .key.correct { background: var(--correct); color: var(--paper); border-color: var(--correct); }
 .key.present { background: var(--present); color: var(--paper); border-color: var(--present); }
 .key.absent  { background: var(--absent);  color: var(--paper); border-color: var(--absent);  }
-.key.absent .k-morse { opacity: 0.55; }
-
-/* Hard mode: hide the letter labels on the keyboard */
-body.hardmode .key .k-letter { visibility: hidden; }
 
 /* --- Modal --- */
 .modal {
@@ -401,8 +410,7 @@ footer {
 }
 
 @media (max-width: 360px) {
-  .key { height: 44px; }
-  .key .k-letter { font-size: 0.85rem; }
-  .key .k-morse { font-size: 0.5rem; }
+  .key { height: 46px; font-size: 0.92rem; }
   .icon-btn { width: 30px; height: 30px; }
+  .play-button { padding: 10px 12px; font-size: 0.85rem; }
 }
