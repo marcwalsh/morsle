@@ -181,6 +181,7 @@ async function submitGuess() {
   });
 
   state.locked = false;
+  document.dispatchEvent(new CustomEvent('morsel:state'));
   if (state.status !== 'playing') {
     setTimeout(() => playAnswer(), 800);
   }
