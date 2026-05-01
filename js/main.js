@@ -1,7 +1,7 @@
 // Boot and event wiring.
 
 import { MORSE, ensureAudio, playMorse } from './morse.js';
-import { initGame, handleKey, getPlayAction, playCurrent, isInModalContext } from './game.js';
+import { initGame, handleKey, canPlay, playCode, isInModalContext } from './game.js';
 import { msUntilMidnightET } from './words.js';
 import { getStats } from './streak.js';
 
@@ -91,7 +91,7 @@ function bindEvents() {
   document.getElementById('btn-stats').addEventListener('click', () => openModal('modal-stats'));
   document.getElementById('btn-play').addEventListener('click', () => {
     ensureAudio();
-    playCurrent();
+    playCode();
   });
 
   document.querySelectorAll('.close-modal').forEach(b => {
@@ -103,10 +103,7 @@ function bindEvents() {
 }
 
 function refreshPlayButton() {
-  const btn = document.getElementById('btn-play');
-  const action = getPlayAction();
-  btn.disabled = !action.enabled;
-  btn.querySelector('.play-label').textContent = action.label;
+  document.getElementById('btn-play').disabled = !canPlay();
 }
 
 async function boot() {

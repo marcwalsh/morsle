@@ -216,25 +216,15 @@ export function render() {
   document.dispatchEvent(new CustomEvent('morsel:state'));
 }
 
-// What the top Play button should do right now.
-// - Locked while the player is mid-typing a new guess.
-// - Post-game: plays the daily answer word.
-// - Mid-game with at least one submitted guess: replays that guess.
-export function getPlayAction() {
-  if (!state) return { enabled: false };
-  if (state.status !== 'playing') {
-    return { enabled: true, label: 'Hear the word', mode: 'answer' };
-  }
-  if (state.current.length > 0) return { enabled: false, label: 'Play code', mode: 'code' };
-  if (state.guesses.length > 0) return { enabled: true, label: 'Play code', mode: 'code' };
-  return { enabled: false, label: 'Play code', mode: 'code' };
+// The Play button plays the daily code (the puzzle's Morse audio) —
+// always available, only locked while the player is mid-typing a guess.
+export function canPlay() {
+  if (!state) return false;
+  return state.current.length === 0;
 }
 
-export function playCurrent() {
-  const action = getPlayAction();
-  if (!action.enabled) return;
-  if (action.mode === 'answer') playAnswer();
-  else playLastSubmittedGuess();
+export function playCode() {
+  if (canPlay()) playAnswer();
 }
 
 function renderBoard() {
@@ -310,17 +300,6 @@ function renderKeyboard() {
 }
 
 // --- Public helpers ---------------------------------------------------------
-
-export function getStatus() { return state?.status ?? 'playing'; }
-export function getAnswer() { return state?.answer ?? ''; }
-export function hasGuesses() { return (state?.guesses?.length ?? 0) > 0; }
-
-export function playLastSubmittedGuess() {
-  if (!state) return;
-  const last = state.guesses[state.guesses.length - 1];
-  if (last) playWord(last);
-  else if (state.current) playWord(state.current);
-}
 
 export function playAnswer() {
   if (state?.answer) playWord(state.answer);
