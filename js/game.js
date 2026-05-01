@@ -182,12 +182,11 @@ async function submitGuess() {
 
   state.locked = false;
   document.dispatchEvent(new CustomEvent('morsel:state'));
-  if (state.status !== 'playing') {
-    setTimeout(() => playAnswer(), 800);
-  }
+  setTimeout(() => playAnswer(), 600);
 }
 
 async function revealRow(rowEl, guess, result) {
+  ensureAudio();
   for (let i = 0; i < 5; i++) {
     const tile = rowEl.children[i];
     const letter = guess[i];
@@ -233,9 +232,18 @@ function renderBoard() {
   for (let r = 0; r < MAX_GUESSES; r++) {
     const row = document.createElement('div');
     row.className = 'row';
+    if (r < state.guesses.length) {
+      const guessedWord = state.guesses[r];
+      row.classList.add('guessed');
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-label', `Replay guess ${guessedWord} in Morse`);
+      row.addEventListener('click', () => {
+        ensureAudio();
+        playWord(guessedWord);
+      });
+    }
     for (let c = 0; c < 5; c++) {
-      const tile = document.createElement('button');
-      tile.type = 'button';
+      const tile = document.createElement('div');
       tile.className = 'tile';
       let letter = '';
       let cls = '';
@@ -285,7 +293,7 @@ function renderKeyboard() {
       if (key === 'ENTER' || key === 'BACK') {
         btn.classList.add('wide');
         btn.classList.add(key === 'ENTER' ? 'enter' : 'back');
-        btn.textContent = key === 'ENTER' ? 'ENTER' : '⌫';
+        btn.textContent = key;
         btn.setAttribute('aria-label', key === 'ENTER' ? 'Submit guess' : 'Delete letter');
       } else {
         btn.textContent = key;

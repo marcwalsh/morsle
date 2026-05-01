@@ -27,9 +27,11 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  padding: 14px 14px 8px;
+  min-height: 100dvh;
+  padding: 12px 14px 6px;
   position: relative;
   overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 /* SVG noise grain for paper texture */
@@ -51,9 +53,9 @@ header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  padding: 4px 2px 14px;
+  padding: 2px 2px 10px;
   border-bottom: 2px solid var(--ink);
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   gap: 8px;
 }
 .brand h1 {
@@ -90,13 +92,13 @@ header {
   color: var(--paper);
   outline: none;
 }
-/* --- Top play bar (always at the very top of the page) --- */
+/* --- Top play bar (sits between header and board) --- */
 .play-bar {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 460px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .play-button {
   width: 100%;
@@ -107,7 +109,7 @@ header {
   background: var(--ink);
   color: var(--paper);
   border: none;
-  padding: 14px 16px;
+  padding: 10px 16px;
   font-family: 'Special Elite', monospace;
   font-size: 1rem;
   letter-spacing: 0.1em;
@@ -115,6 +117,7 @@ header {
   border-radius: 3px;
   transition: opacity 0.15s ease, transform 0.05s ease;
   box-shadow: 3px 3px 0 var(--ink);
+  touch-action: manipulation;
 }
 .play-button:hover { opacity: 0.92; }
 .play-button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
@@ -155,7 +158,11 @@ header {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
 }
+.row.guessed { cursor: pointer; }
+.row.guessed:hover { background: rgba(26,22,18,0.06); }
 .tile {
   aspect-ratio: 1 / 1.18;
   border: 2px solid rgba(26,22,18,0.22);
@@ -166,11 +173,10 @@ header {
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  cursor: default;
   user-select: none;
   transition: border-color 0.15s ease;
 }
-.tile.filled { border-color: var(--ink); cursor: pointer; }
+.tile.filled { border-color: var(--ink); }
 .tile.pop { animation: pop 0.14s ease; }
 .tile.flip { animation: flip 0.5s ease forwards; }
 @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
@@ -198,13 +204,14 @@ header {
   width: 100%;
   margin-top: auto;
   padding-bottom: 4px;
+  user-select: none;
 }
 .kb-row { display: flex; justify-content: center; gap: 4px; }
 .key {
   flex: 1;
   min-width: 0;
   max-width: 42px;
-  height: 52px;
+  height: 50px;
   border: 1.5px solid var(--ink);
   background: rgba(255,255,255,0.25);
   color: var(--ink);
@@ -218,9 +225,12 @@ header {
   border-radius: 3px;
   padding: 0;
   transition: background 0.15s ease, transform 0.05s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .key:active { transform: translateY(1px); }
-.key.wide { flex: 1.6; max-width: 64px; font-size: 0.7rem; letter-spacing: 0.08em; }
+.key.wide { flex: 1.6; max-width: 70px; font-size: 0.72rem; letter-spacing: 0.08em; }
 .key.enter { background: var(--ink); color: var(--paper); }
 .key.enter:hover { opacity: 0.9; }
 .key.correct { background: var(--correct); color: var(--paper); border-color: var(--correct); }
@@ -378,17 +388,37 @@ header {
 }
 
 footer {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
   text-align: center;
-  margin-top: 10px;
+  margin-top: 6px;
   text-transform: uppercase;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
+}
+
+/* Mobile: keep header → play button → board → keyboard within one viewport. */
+@media (max-height: 760px) {
+  body { padding: 8px 12px 4px; }
+  header { padding: 2px 2px 6px; margin-bottom: 6px; }
+  .brand h1 { font-size: clamp(1.6rem, 6.5vw, 2.1rem); }
+  .subtitle { display: none; }
+  .play-bar { margin-bottom: 8px; }
+  .play-button { padding: 9px 14px; font-size: 0.92rem; box-shadow: 2px 2px 0 var(--ink); }
+  #board { gap: 5px; max-width: 320px; }
+  .row { gap: 5px; }
+  .tile .letter { font-size: clamp(1.3rem, 6vw, 1.7rem); }
+  #message { min-height: 18px; font-size: 0.7rem; margin-bottom: 4px; }
+  #keyboard { gap: 4px; }
+  .key { height: 44px; font-size: 0.95rem; }
+  .key.wide { font-size: 0.65rem; }
+  footer { font-size: 0.5rem; margin-top: 4px; }
 }
 
 @media (max-width: 360px) {
-  .key { height: 46px; font-size: 0.92rem; }
-  .icon-btn { width: 30px; height: 30px; }
-  .play-button { padding: 10px 12px; font-size: 0.85rem; }
+  .key { max-width: 36px; height: 42px; font-size: 0.88rem; }
+  .key.wide { max-width: 56px; font-size: 0.6rem; }
+  .icon-btn { width: 28px; height: 28px; font-size: 0.85rem; }
+  .play-button { padding: 8px 12px; font-size: 0.85rem; letter-spacing: 0.06em; }
+  .actions { gap: 4px; }
 }
