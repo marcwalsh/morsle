@@ -223,9 +223,10 @@ export function render() {
   document.dispatchEvent(new CustomEvent('morsel:state'));
 }
 
-export function canPlayAnswer() {
+export function canPlayCode() {
   if (!state) return false;
-  return state.status === 'won' || state.status === 'lost';
+  if (state.current.length > 0) return false;
+  return state.guesses.length > 0;
 }
 
 function renderBoard() {
