@@ -53,9 +53,6 @@ export async function initGame({ onChange }) {
   if (state.status === 'lost') {
     flashMessage(`Word was ${state.answer}. Tap ▶ to hear it.`, true);
   }
-  if (state.status !== 'playing') {
-    showPostGame({ autoPlay: false });
-  }
 }
 
 function mergeKeyStates(guess, result) {
@@ -185,7 +182,7 @@ async function submitGuess() {
 
   state.locked = false;
   if (state.status !== 'playing') {
-    setTimeout(() => showPostGame({ autoPlay: true }), 600);
+    setTimeout(() => playAnswer(), 800);
   }
 }
 
@@ -210,11 +207,6 @@ async function revealRow(rowEl, guess, result) {
   }
 }
 
-function showPostGame({ autoPlay = false } = {}) {
-  document.getElementById('post-game').hidden = false;
-  if (autoPlay) setTimeout(() => playWord(state.answer), 400);
-}
-
 // --- Render -----------------------------------------------------------------
 
 export function render() {
@@ -223,10 +215,25 @@ export function render() {
   document.dispatchEvent(new CustomEvent('morsel:state'));
 }
 
-export function canPlayCode() {
-  if (!state) return false;
-  if (state.current.length > 0) return false;
-  return state.guesses.length > 0;
+// What the top Play button should do right now.
+// - Locked while the player is mid-typing a new guess.
+// - Post-game: plays the daily answer word.
+// - Mid-game with at least one submitted guess: replays that guess.
+export function getPlayAction() {
+  if (!state) return { enabled: false };
+  if (state.status !== 'playing') {
+    return { enabled: true, label: 'Hear the word', mode: 'answer' };
+  }
+  if (state.current.length > 0) return { enabled: false, label: 'Play code', mode: 'code' };
+  if (state.guesses.length > 0) return { enabled: true, label: 'Play code', mode: 'code' };
+  return { enabled: false, label: 'Play code', mode: 'code' };
+}
+
+export function playCurrent() {
+  const action = getPlayAction();
+  if (!action.enabled) return;
+  if (action.mode === 'answer') playAnswer();
+  else playLastSubmittedGuess();
 }
 
 function renderBoard() {

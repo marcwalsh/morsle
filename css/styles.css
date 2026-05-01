@@ -190,27 +190,6 @@ header {
   color: var(--signal);
   margin-bottom: 6px;
 }
-#post-game {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 10px;
-  min-height: 0;
-}
-.btn-primary {
-  background: var(--ink);
-  color: var(--paper);
-  border: none;
-  padding: 9px 18px;
-  font-family: 'Special Elite', monospace;
-  font-size: 0.9rem;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  border-radius: 2px;
-  transition: opacity 0.15s ease, transform 0.1s ease;
-}
-.btn-primary:hover { opacity: 0.88; }
-.btn-primary:active { transform: translateY(1px); }
-
 /* --- Keyboard --- */
 #keyboard {
   display: flex;
