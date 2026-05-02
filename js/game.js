@@ -116,7 +116,7 @@ export function handleKey(key) {
   if (key === 'BACK') {
     state.current = state.current.slice(0, -1);
     renderActiveRow();
-    document.dispatchEvent(new CustomEvent('morsel:state'));
+    document.dispatchEvent(new CustomEvent('ditdah:state'));
     return;
   }
   if (state.current.length >= 5) return;
@@ -128,7 +128,7 @@ export function handleKey(key) {
     tile.classList.add('pop');
     setTimeout(() => tile.classList.remove('pop'), 140);
   }
-  document.dispatchEvent(new CustomEvent('morsel:state'));
+  document.dispatchEvent(new CustomEvent('ditdah:state'));
 }
 
 async function submitGuess() {
@@ -181,8 +181,8 @@ async function submitGuess() {
   });
 
   state.locked = false;
-  document.dispatchEvent(new CustomEvent('morsel:state'));
-  setTimeout(() => playAnswer(), 600);
+  document.dispatchEvent(new CustomEvent('ditdah:state'));
+  document.dispatchEvent(new CustomEvent('ditdah:submitted'));
 }
 
 async function revealRow(rowEl, guess, result) {
@@ -195,7 +195,12 @@ async function revealRow(rowEl, guess, result) {
     const dur = morseDurationMs(code);
 
     tile.classList.add('flip');
-    playMorse(code);
+    playMorse(code, {
+      onElement: (_type, durMs) => {
+        tile.classList.add('lit');
+        setTimeout(() => tile.classList.remove('lit'), durMs);
+      }
+    });
     setTimeout(() => {
       tile.classList.add('filled');
       tile.classList.add(cls);
@@ -212,7 +217,7 @@ async function revealRow(rowEl, guess, result) {
 export function render() {
   renderBoard();
   renderKeyboard();
-  document.dispatchEvent(new CustomEvent('morsel:state'));
+  document.dispatchEvent(new CustomEvent('ditdah:state'));
 }
 
 // The Play button plays the daily code (the puzzle's Morse audio) —
@@ -222,8 +227,8 @@ export function canPlay() {
   return state.current.length === 0;
 }
 
-export function playCode() {
-  if (canPlay()) playAnswer();
+export function playCode(opts) {
+  if (canPlay()) playAnswer(opts);
 }
 
 function renderBoard() {
@@ -234,12 +239,20 @@ function renderBoard() {
     row.className = 'row';
     if (r < state.guesses.length) {
       const guessedWord = state.guesses[r];
+      const tilesForRow = [];
       row.classList.add('guessed');
       row.setAttribute('role', 'button');
       row.setAttribute('aria-label', `Replay guess ${guessedWord} in Morse`);
       row.addEventListener('click', () => {
         ensureAudio();
-        playWord(guessedWord);
+        document.dispatchEvent(new CustomEvent('ditdah:replay-row', {
+          detail: { word: guessedWord, tiles: tilesForRow }
+        }));
+      });
+      // Stash tile refs once they're appended below so the visualiser can
+      // glow each tile as its letter plays.
+      queueMicrotask(() => {
+        for (let i = 0; i < 5; i++) tilesForRow.push(row.children[i]);
       });
     }
     for (let c = 0; c < 5; c++) {
@@ -309,8 +322,8 @@ function renderKeyboard() {
 
 // --- Public helpers ---------------------------------------------------------
 
-export function playAnswer() {
-  if (state?.answer) playWord(state.answer);
+export function playAnswer(opts) {
+  if (state?.answer) playWord(state.answer, opts);
 }
 
 export function isInModalContext() {

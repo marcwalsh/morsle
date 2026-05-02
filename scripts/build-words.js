@@ -61,7 +61,7 @@ const ANSWERS = [
   "YOUNG","YOUTH"
 ];
 
-const SECRET = 'morsel-v1';
+const SECRET = 'ditdah-v1';
 
 function encryptWord(word, index) {
   const key = crypto.createHash('sha256').update(`${SECRET}-${index}`).digest();

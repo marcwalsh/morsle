@@ -34,15 +34,39 @@ function tone(start, dur) {
 }
 
 // Schedules a Morse code string and returns its total duration in seconds.
-export function playMorse(code, unit = DEFAULT_UNIT) {
+// `opts.onElement(type, durationMs)` fires at the start of each dit/dah; it
+// receives 'dit' or 'dah' and the audible duration in ms (so a visualiser can
+// flash for exactly that long). `opts.onEnd()` fires when playback finishes.
+export function playMorse(code, opts = {}) {
   ensureAudio();
+  const unit = opts.unit ?? DEFAULT_UNIT;
+  const { onElement, onEnd } = opts;
   let t = audioCtx.currentTime + 0.02;
   const startT = t;
+
   for (const ch of code) {
-    if (ch === '.') { tone(t, unit);     t += unit * 2; }
-    else if (ch === '-') { tone(t, unit * 3); t += unit * 4; }
-    else if (ch === ' ') { t += unit * 2; }
+    if (ch === '.') {
+      tone(t, unit);
+      if (onElement) {
+        const delay = Math.max(0, (t - audioCtx.currentTime) * 1000);
+        const dur = unit * 1000;
+        setTimeout(() => onElement('dit', dur), delay);
+      }
+      t += unit * 2;
+    } else if (ch === '-') {
+      tone(t, unit * 3);
+      if (onElement) {
+        const delay = Math.max(0, (t - audioCtx.currentTime) * 1000);
+        const dur = unit * 3 * 1000;
+        setTimeout(() => onElement('dah', dur), delay);
+      }
+      t += unit * 4;
+    } else if (ch === ' ') {
+      t += unit * 2;
+    }
   }
+  const totalMs = (t - startT) * 1000;
+  if (onEnd) setTimeout(onEnd, totalMs);
   return t - startT;
 }
 
@@ -56,11 +80,11 @@ export function morseDurationMs(code, unit = DEFAULT_UNIT) {
   return total * 1000;
 }
 
-export function playLetter(letter, unit) {
-  return playMorse(MORSE[letter], unit);
+export function playLetter(letter, opts) {
+  return playMorse(MORSE[letter], opts);
 }
 
-export function playWord(word, unit) {
+export function playWord(word, opts) {
   const code = word.split('').map(l => MORSE[l]).join(' ');
-  return playMorse(code, unit);
+  return playMorse(code, opts);
 }

@@ -1,6 +1,6 @@
 // Boot and event wiring.
 
-import { MORSE, ensureAudio, playMorse } from './morse.js';
+import { MORSE, ensureAudio, playMorse, playWord, morseDurationMs } from './morse.js';
 import { initGame, handleKey, canPlay, playCode, isInModalContext } from './game.js';
 import { msUntilMidnightET } from './words.js';
 import { getStats } from './streak.js';
@@ -91,7 +91,7 @@ function bindEvents() {
   document.getElementById('btn-stats').addEventListener('click', () => openModal('modal-stats'));
   document.getElementById('btn-play').addEventListener('click', () => {
     ensureAudio();
-    playCode();
+    playCode(buildLampVisuals());
   });
 
   document.querySelectorAll('.close-modal').forEach(b => {
@@ -106,10 +106,53 @@ function refreshPlayButton() {
   document.getElementById('btn-play').disabled = !canPlay();
 }
 
+// Replay one word (one row) sequentially, glowing each tile while its
+// letter's Morse code plays.
+async function playRowWithGlow(word, tiles) {
+  ensureAudio();
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  for (let i = 0; i < word.length; i++) {
+    const tile = tiles[i];
+    const code = MORSE[word[i]];
+    const dur = morseDurationMs(code);
+    playMorse(code, {
+      onElement: (_t, durMs) => {
+        if (!tile) return;
+        tile.classList.add('lit');
+        setTimeout(() => tile.classList.remove('lit'), durMs);
+      }
+    });
+    await sleep(dur + 150);
+  }
+}
+
+function buildLampVisuals() {
+  const btn = document.getElementById('btn-play');
+  const lamp = btn.querySelector('.play-lamp');
+  btn.classList.add('playing');
+  return {
+    onElement: (_type, durMs) => {
+      lamp.classList.add('lit');
+      setTimeout(() => lamp.classList.remove('lit'), durMs);
+    },
+    onEnd: () => {
+      btn.classList.remove('playing');
+      lamp.classList.remove('lit');
+    }
+  };
+}
+
 async function boot() {
   bindEvents();
   renderChart();
-  document.addEventListener('morsel:state', refreshPlayButton);
+  document.addEventListener('ditdah:state', refreshPlayButton);
+  document.addEventListener('ditdah:submitted', () => {
+    setTimeout(() => playCode(buildLampVisuals()), 600);
+  });
+  document.addEventListener('ditdah:replay-row', (e) => {
+    const { word, tiles } = e.detail;
+    playRowWithGlow(word, tiles);
+  });
   await initGame({ onChange: renderStats });
   renderStats();
   refreshPlayButton();

@@ -2,8 +2,22 @@
 // Stored in localStorage. Today's saved game stores guesses + per-tile
 // result classes only — never the answer in plaintext.
 
-const STATS_KEY = 'morsel.stats.v1';
-const TODAY_KEY = 'morsel.today.v1';
+const STATS_KEY = 'ditdah.stats.v1';
+const TODAY_KEY = 'ditdah.today.v1';
+
+// One-time migration from the old "morsel.*" keys.
+(function migrate() {
+  try {
+    const oldStats = localStorage.getItem('morsel.stats.v1');
+    if (oldStats && !localStorage.getItem(STATS_KEY)) {
+      localStorage.setItem(STATS_KEY, oldStats);
+    }
+    const oldToday = localStorage.getItem('morsel.today.v1');
+    if (oldToday && !localStorage.getItem(TODAY_KEY)) {
+      localStorage.setItem(TODAY_KEY, oldToday);
+    }
+  } catch {}
+})();
 
 function load(key, fallback) {
   try {

@@ -2,21 +2,25 @@
 <html lang="en-GB">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Morsel · A Wordle for Morse code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f17">
+  <title>ditdah · daily morse</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <header>
     <div class="brand">
-      <h1>MORSEL</h1>
-      <p class="subtitle">·–· daily transmission –·–·</p>
+      <h1>ditdah</h1>
+      <p class="subtitle" aria-hidden="true">−·· ·· − −·· ·− ····</p>
     </div>
     <div class="actions">
-      <span class="streak-pill" title="Daily streak"><span id="streak-display">0</span></span>
+      <span class="streak-pill" title="Daily streak">
+        <span class="streak-flame" aria-hidden="true"></span>
+        <span id="streak-display">0</span>
+      </span>
       <button id="btn-help" class="icon-btn" aria-label="How to play" title="How to play">?</button>
       <button id="btn-chart" class="icon-btn" aria-label="Morse chart" title="Morse chart">⋯</button>
       <button id="btn-stats" class="icon-btn" aria-label="Stats" title="Stats">★</button>
@@ -25,6 +29,7 @@
 
   <div class="play-bar">
     <button id="btn-play" class="play-button" type="button" aria-label="Play today's Morse code">
+      <span class="play-lamp" aria-hidden="true"></span>
       <span class="play-icon" aria-hidden="true">▶</span>
       <span class="play-label">Play code</span>
     </button>
@@ -33,24 +38,22 @@
   <main>
     <div id="board"></div>
     <div id="message" aria-live="polite"></div>
-
     <div id="keyboard"></div>
   </main>
 
-  <footer>tap a guessed tile to replay its signal · new word at midnight ET</footer>
+  <footer>tap a guessed row to replay it · new code at midnight ET</footer>
 
   <!-- Modals -->
   <div id="modal-help" class="modal" hidden>
     <div class="modal-card">
       <h2>How to play</h2>
-      <p>Guess the 5-letter word in 6 tries. A new word appears every day at midnight Eastern Time.</p>
-      <p>Type your guess and hit Enter. The row plays back in Morse, letter by letter, as it reveals the result.</p>
+      <p>Hit <b>Play code</b> to hear today's 5-letter word in Morse. Type your guess and submit. The row plays back letter by letter as it reveals what you got right.</p>
       <ul class="legend">
         <li><span class="swatch correct"></span> Right letter, right spot</li>
         <li><span class="swatch present"></span> Right letter, wrong spot</li>
         <li><span class="swatch absent"></span> Not in the word</li>
       </ul>
-      <p class="tip">Each guessed tile shows the Morse code for its letter — tap a tile to replay it. The chart (⋯) has the full alphabet.</p>
+      <p class="tip">Tap any guessed row to hear it again. The chart (⋯) has the full alphabet — tap a letter to hear it. New code at midnight Eastern Time.</p>
       <button class="close-modal" type="button">Got it</button>
     </div>
   </div>
@@ -88,7 +91,7 @@
       <div class="stat-section-title">Guess distribution</div>
       <div id="stat-distribution"></div>
       <div class="next-word">
-        <span>Next word in</span>
+        <span>Next code in</span>
         <span class="countdown" id="next-countdown">--:--:--</span>
       </div>
       <button class="close-modal" type="button">Close</button>
